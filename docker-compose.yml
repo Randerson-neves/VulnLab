@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: vulnlab-store
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://vulnuser:vulnpass123@db:5432/vulnlab
+      - JWT_SECRET=secret123
+      - NODE_ENV=development
+    depends_on:
+      - db
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - vulnlab-network
+
+  db:
+    image: postgres:15-alpine
+    container_name: vulnlab-db
+    environment:
+      POSTGRES_USER: vulnuser
+      POSTGRES_PASSWORD: vulnpass123
+      POSTGRES_DB: vulnlab
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - vulnlab-network
+
+volumes:
+  pgdata:
+
+networks:
+  vulnlab-network:
+    driver: bridge
